@@ -340,7 +340,7 @@ class RequirementSet(object):
                 return self.requirements[self.requirement_aliases[name]]
         raise KeyError("No project with the name %r" % project_name)
 
-    def prepare_files(self, finder):
+    def prepare_files(self, finder, root=None):
         """
         Prepare process. Create temp directories, download and/or unpack files.
         """
@@ -366,7 +366,8 @@ class RequirementSet(object):
                     finder,
                     req,
                     require_hashes=require_hashes,
-                    ignore_dependencies=self.ignore_dependencies))
+                    ignore_dependencies=self.ignore_dependencies,
+                    root=root))
             except HashError as exc:
                 exc.req = req
                 hash_errors.append(exc)
@@ -381,7 +382,7 @@ class RequirementSet(object):
             )
         )
 
-    def _check_skip_installed(self, req_to_install, finder):
+    def _check_skip_installed(self, req_to_install, finder, root=None):
         """Check if req_to_install should be skipped.
 
         This will check if the req is installed, and whether we should upgrade
@@ -400,7 +401,7 @@ class RequirementSet(object):
         :return: A text reason for why it was skipped, or None.
         """
         # Check whether to upgrade/reinstall this req or not.
-        req_to_install.check_if_exists()
+        req_to_install.check_if_exists(root=root)
         if req_to_install.satisfied_by:
             upgrade_allowed = self._is_upgrade_allowed(req_to_install)
 
@@ -449,7 +450,8 @@ class RequirementSet(object):
                       finder,
                       req_to_install,
                       require_hashes=False,
-                      ignore_dependencies=False):
+                      ignore_dependencies=False,
+                      root=None):
         """Prepare a single requirements file.
 
         :return: A list of additional InstallRequirements to also install.
@@ -473,7 +475,7 @@ class RequirementSet(object):
             assert req_to_install.satisfied_by is None
             if not self.ignore_installed:
                 skip_reason = self._check_skip_installed(
-                    req_to_install, finder)
+                    req_to_install, finder, root=root)
 
             if req_to_install.satisfied_by:
                 assert skip_reason is not None, (
@@ -631,7 +633,7 @@ class RequirementSet(object):
                 # pkgs repeat check_if_exists to uninstall-on-upgrade
                 # (#14)
                 if not self.ignore_installed:
-                    req_to_install.check_if_exists()
+                    req_to_install.check_if_exists(root=root)
                 if req_to_install.satisfied_by:
                     if self.upgrade or self.ignore_installed:
                         # don't uninstall conflict if user install and

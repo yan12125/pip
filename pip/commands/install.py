@@ -258,7 +258,10 @@ class InstallCommand(RequirementCommand):
                         # on -d don't do complex things like building
                         # wheels, and don't try to build wheels when wheel is
                         # not installed.
-                        requirement_set.prepare_files(finder)
+                        requirement_set.prepare_files(
+                            finder,
+                            root=options.root_path,
+                        )
                     else:
                         # build wheels before install.
                         wb = WheelBuilder(

@@ -880,7 +880,7 @@ class InstallRequirement(object):
 
         self.install_succeeded = True
 
-    def check_if_exists(self):
+    def check_if_exists(self, root=None):
         """Find an installed distribution that satisfies or conflicts
         with this requirement, and set self.satisfied_by or
         self.conflicts_with appropriately.
@@ -894,7 +894,7 @@ class InstallRequirement(object):
             # evaluate it.
             no_marker = Requirement(str(self.req))
             no_marker.marker = None
-            self.satisfied_by = pkg_resources.get_distribution(str(no_marker))
+            self.satisfied_by = pkg_resources.get_distribution(str(no_marker), root=root)
             if self.editable and self.satisfied_by:
                 self.conflicts_with = self.satisfied_by
                 # when installing editables, nothing pre-existing should ever
